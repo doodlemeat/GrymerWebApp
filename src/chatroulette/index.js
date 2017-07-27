@@ -8,10 +8,6 @@ import WebRTCNoSupport from './webrtc-no-support';
 import NotSupported from './not-supported.js';
 import Toolbar from './components/Toolbar';
 
-import RaisedButton from 'material-ui/RaisedButton';
-import FontIcon from 'material-ui/FontIcon';
-import Checkbox from 'material-ui/Checkbox';
-
 import { Session, RemoteStatus } from './session';
 
 const styles = {
@@ -214,11 +210,9 @@ class ChatRoulette extends React.Component {
 	
 	renderRemoteOverlay() {
 		if(this.state.hasRemote) return null;
-		
-		const { muteLocalAudio, muteLocalVideo } = this.state;
 		return (
-			<div style={[styles.videoOverlay, styles.videoOverlayText, { webkitTapHighlightColor: 'rgba(0, 0, 0, 0)' }]}>
-				<Typography.Body1>{this.state.remoteStatus}</Typography.Body1>
+			<div style={[styles.videoOverlay, styles.videoOverlayText]}>
+				<Typography.Body1 style={{ textAlign: 'center' }}>{this.state.remoteStatus}</Typography.Body1>
 			</div>
 		);
 	}
@@ -237,7 +231,7 @@ class ChatRoulette extends React.Component {
 	}
 	
 	renderMinimal() {
-		const { hasRemote, optimalClientVideoWidth, windowHeight, isSearching, muteLocalAudio, muteLocalVideo } = this.state;
+		const { hasRemote, windowHeight, isSearching, muteLocalAudio, muteLocalVideo } = this.state;
 		styleMinimal.base.height = windowHeight;
 		return (
 			<div style={styleMinimal.base}>
@@ -250,12 +244,12 @@ class ChatRoulette extends React.Component {
 							 handleStartStop={this.toggleStart}
 							 handleNext={this.handleNext}
 							 getVideo={this.getLocalVideoEl}
-							 hasStarted={this.state.isSearching}
-							 hasRemote={this.state.hasRemote}
+							 hasStarted={isSearching}
+							 hasRemote={hasRemote}
 							 handleMuteMyAudio={this.handleMuteMyAudio}
 							 handleMuteMyVideo={this.handleMuteMyVideo}
-							 muteLocalAudio={this.state.muteLocalAudio}
-							 muteLocalVideo={this.state.muteLocalVideo} />
+							 muteLocalAudio={muteLocalAudio}
+							 muteLocalVideo={muteLocalVideo} />
 				</div>
 			</div>
 		);

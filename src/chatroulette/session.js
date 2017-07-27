@@ -208,9 +208,9 @@ export class Session extends EventEmitter {
 
 export const RemoteStatus = {
 	NO_REMOTE: (
-		<span>You have no partner.<br />Press start to begin.</span>
+		<span>Du har ingen partner.<br />Tryck på START för att börja.</span>
 	),
 	STARTED_NO_REMOTE: (
-		<span>Searching for a partner...</span>
+		<span>Söker efter en partner...</span>
 	)
 };

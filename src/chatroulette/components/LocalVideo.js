@@ -9,7 +9,7 @@ export default class extends React.Component {
 		const { width, height } = OptimalResolution(this.props.videoWidth, this.props.videoHeight, this.props.maxSize);
 		return (
 			<div>
-				<div style={{display: 'flex', flexWrap: 'wrap', justifyContent: 'flex-end', marginBottom: 16 }}>
+				<div style={{display: 'flex', flexWrap: 'wrap', justifyContent: 'flex-end', marginBottom: 16, webkitTapHighlightColor: 'rgba(0, 0, 0, 0)' }}>
 					<div>
 						<Checkbox
 							onCheck={this.props.handleMuteMyAudio}

@@ -4,6 +4,15 @@ import FontIcon from 'material-ui/FontIcon';
 import RaisedButton from 'material-ui/RaisedButton';
 
 export default class extends React.Component {
+	constructor(props) {
+		super(props);
+		
+		this.state = {
+			snackbarOpen: false,
+			snackbarMessage: ''
+		};
+	}
+	
 	render() {
 		const { hasStarted, hasRemote } = this.props;
 		return (
@@ -23,12 +32,12 @@ export default class extends React.Component {
 					<RaisedButton
 								style={{ flexGrow: '1', borderRadius: 0 }}
 								onClick={this.props.handleStartStop}
-								label={hasStarted ? 'Stop' : 'Start'}
+								label={hasStarted ? 'Stopp' : 'Start'}
 								icon={<FontIcon className="material-icons">{hasStarted ? 'stop' : 'play_arrow'}</FontIcon>} />
 					<RaisedButton  
 								style={{ flexGrow: '1', borderRadius: 0 }}
 								onClick={this.props.handleNext}
-								label="Next"
+								label="Nästa"
 								disabled={hasRemote ? false : true}
 								icon={<FontIcon className="material-icons">skip_next</FontIcon>} />
 				</div>
