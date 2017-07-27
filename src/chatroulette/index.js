@@ -72,7 +72,6 @@ const styleMinimal = {
 	}
 };
 
-@Radium
 class ChatRoulette extends React.Component {
 
 	constructor() {
@@ -263,4 +262,4 @@ class ChatRoulette extends React.Component {
 	}
 }
 
-export default ChatRoulette;
+export default Radium(ChatRoulette);
