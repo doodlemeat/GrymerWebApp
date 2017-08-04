@@ -1,47 +1,52 @@
-import React from 'react';
+import React, { Component } from 'react';
 import LocalVideo from './LocalVideo';
 import FontIcon from 'material-ui/FontIcon';
 import RaisedButton from 'material-ui/RaisedButton';
+import { connect } from 'react-redux';
+import { toggleSearch, searchNext } from '../../actions';
 
-export default class extends React.Component {
-	constructor(props) {
-		super(props);
-		
-		this.state = {
-			snackbarOpen: false,
-			snackbarMessage: ''
-		};
-	}
-	
+class Toolbar extends Component {
 	render() {
-		const { hasStarted, hasRemote } = this.props;
 		return (
 			<div style={{ position: 'absolute', bottom: 0, left: 0, right: 0 }}>
 			
 				<LocalVideo offset={20}
 							maxSize={90}
 							videoWidth={this.props.videoWidth}
-							videoHeight={this.props.videoHeight}
-							getVideo={this.props.getVideo}
-						    handleMuteMyAudio={this.props.handleMuteMyAudio}
-						    handleMuteMyVideo={this.props.handleMuteMyVideo}
-						    muteLocalAudio={this.props.muteLocalAudio}
-						    muteLocalVideo={this.props.muteLocalVideo} />
+							videoHeight={this.props.videoHeight} />
 							
 				<div style={{ display: 'flex', overflow: 'hidden' }}>
 					<RaisedButton
 								style={{ flexGrow: '1', borderRadius: 0 }}
-								onClick={this.props.handleStartStop}
-								label={hasStarted ? 'Stopp' : 'Start'}
-								icon={<FontIcon className="material-icons">{hasStarted ? 'stop' : 'play_arrow'}</FontIcon>} />
+								onClick={this.props.toggleSearch}
+								disabled={this.props.hasSignalingConnection ? false : true}
+								label={this.props.isSearching ? 'Stopp' : 'Start'}
+								icon={<FontIcon className="material-icons">{this.props.isSearching ? 'stop' : 'play_arrow'}</FontIcon>} />
 					<RaisedButton  
 								style={{ flexGrow: '1', borderRadius: 0 }}
-								onClick={this.props.handleNext}
+								onClick={this.props.searchNext}
 								label="Nästa"
-								disabled={hasRemote ? false : true}
+								disabled={this.props.hasPartner ? false : true}
 								icon={<FontIcon className="material-icons">skip_next</FontIcon>} />
 				</div>
 			</div>
 		);
 	}
 }
+
+function mapStateToProps(state) {
+	return {
+		isSearching: state.isSearching,
+		hasPartner: state.hasPartner,
+		hasSignalingConnection: state.hasSignalingConnection
+	};
+}
+
+function mapDispatchToProps(dispatch) {
+	return {
+		toggleSearch: () => dispatch(toggleSearch()),
+		searchNext: () => dispatch(searchNext())
+	};
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(Toolbar);

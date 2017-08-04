@@ -1,5 +1,4 @@
 import React from 'react';
-import Store from 'store';
 import $ from 'jquery';
 import Radium from 'radium';
 import Typography from '@react-mdc/typography';
@@ -7,8 +6,14 @@ import WebRTCSupport from './webrtc-support';
 import WebRTCNoSupport from './webrtc-no-support';
 import NotSupported from './not-supported.js';
 import Toolbar from './components/Toolbar';
+import ChatDrawer from './components/ChatDrawer';
+import Badge from 'material-ui/Badge';
+import IconButton from 'material-ui/IconButton';
+import ChatIcon from 'material-ui/svg-icons/communication/chat';
+import { connect } from 'react-redux';
+import { sendICECandidate, setupRemoteVideoElement } from '../actions';
 
-import { Session, RemoteStatus } from './session';
+//import { Session, RemoteStatus } from './session';
 
 const styles = {
 	base: {
@@ -68,30 +73,23 @@ const styleMinimal = {
 	}
 };
 
-class ChatRoulette extends React.Component {
+class Grymer extends React.Component {
 
 	constructor() {
 		super();
 		
 		this.state = {
-			isSearching: false,
-			muteLocalAudio: Store.get('muteLocalAudio') || false,
-			muteLocalVideo: Store.get('muteLocalVideo') || false,
 			clientVideoWidth: 90,
 			clientVideoHeight: 90,
-			hasRemote: false,
-			remoteStatus: RemoteStatus.NO_REMOTE,
 			orientationAngle: false,
-			windowHeight: $(window).height()
+			windowHeight: $(window).height(),
+			navDrawerOpen: false
 		};
-		this.toggleStart = this.toggleStart.bind(this);
-		this.handleNext = this.handleNext.bind(this);
-		this.handleMuteMyAudio = this.handleMuteMyAudio.bind(this);
-		this.handleMuteMyVideo = this.handleMuteMyVideo.bind(this);
 		this.onResize = this.onResize.bind(this);
 		this.onOrientationChange = this.onOrientationChange.bind(this);
 		this.onLocalVideoDimensions = this.onLocalVideoDimensions.bind(this);
-		this.getLocalVideoEl = this.getLocalVideoEl.bind(this);
+		this.handleChangRequestChatDrawer = this.handleChangRequestChatDrawer.bind(this);
+		this.handleOnChatToggle = this.handleOnChatToggle.bind(this);
 	}
 	
 	onOrientationChange() {
@@ -116,21 +114,8 @@ class ChatRoulette extends React.Component {
 	componentDidMount() {
 		window.addEventListener('orientationchange', this.onOrientationChange);
 		window.addEventListener('resize', this.onResize);
-		this.session = new Session({
-			localVideo: this.myVideoEl,
-			remoteVideo: this.otherVideoEl,
-			autoRequestMedia: true,
-			muteLocalAudio: this.state.muteLocalAudio,
-			muteLocalVideo: this.state.muteLocalVideo
-		});
-		this.session.on('ready', () => {
-			this.setState({ ready: true });
-		});
-		this.session.on('local-video-dimensions', this.onLocalVideoDimensions);
-		this.session.on('remote-connect', () => this.setState({ hasRemote: true }));
-		this.session.on('remote-hangup', () => this.setState({ hasRemote: false }));
-		this.session.on('disconnect', () => this.setState({ isSearching: false }));
-		this.session.getIceServers();
+		
+		this.props.setupRemoteVideoElement(this.otherVideoEl);
 	}
 	
 	onLocalVideoDimensions(videoWidth, videoHeight) {
@@ -140,81 +125,35 @@ class ChatRoulette extends React.Component {
 		});
 	}
 	
-	getLocalVideoEl(el) {
-		return this.myVideoEl = el;
-	}
-
-	toggleStart() {
-		let isSearching = !this.state.isSearching;
-		let remoteStatus = this.state.remoteStatus;
-		
-		if(isSearching) {
-			remoteStatus = RemoteStatus.STARTED_NO_REMOTE;
-		} else {
-			remoteStatus = RemoteStatus.NO_REMOTE;
-		}
-		
-		this.setState({ isSearching: isSearching, remoteStatus: remoteStatus });
-		
-		if(isSearching) {
-			this.session.start();
-		} else {
-			this.session.stop();
-		}
-	}
-	
 	handleNext() {
-		this.session.next();
+		this.session.close();
+		this.props.onNext();
 	}
-  
-  handleMuteMyAudio(e, isInputChecked) {
-	  this.setState({ muteLocalAudio: !this.state.muteLocalAudio });
-	  this.session.toggleLocalAudio();
-	  Store.set('muteLocalAudio', isInputChecked);
-  }
-  
-  handleMuteMyVideo(e, isInputChecked) {
-	  this.setState({ muteLocalVideo: !this.state.muteLocalVideo });
-	  this.session.toggleLocalVideo();
-	  Store.set('muteLocalVideo', isInputChecked);
-  }
-  /*
-	renderLocalOverlay() {
-		const { muteLocalAudio, muteLocalVideo } = this.state;
-		if(muteLocalAudio || muteLocalVideo) {
-			return (
-				<div style={styles.videoOverlay}>
-				
-					<div style={styles.chipsWrapper}>
-						{muteLocalAudio ? 
-							 <Chip backgroundColor={Color.lightBlue600} labelColor="white" style={styles.overlayChip}>
-								<Avatar backgroundColor={Color.blue900} color={Color.lightBlue600} icon={<FontIcon className="material-icons">mic_off</FontIcon>} />
-								Michrophone muted
-							</Chip> :
-							''
-						}
-						
-						{muteLocalVideo ? 
-							 <Chip backgroundColor={Color.lightBlue600} labelColor="white" style={styles.overlayChip}>
-								<Avatar backgroundColor={Color.blue900} color={Color.lightBlue600} icon={<FontIcon className="material-icons">webcam_off</FontIcon>} />
-								Camera muted
-							</Chip> :
-							''
-						}
-					</div>
-				
-				</div>
-			);
-		}
-	}*/
 	
 	renderRemoteOverlay() {
-		if(this.state.hasRemote) return null;
-		return (
-			<div style={[styles.videoOverlay, styles.videoOverlayText]}>
-				<Typography.Body1 style={{ textAlign: 'center' }}>{this.state.remoteStatus}</Typography.Body1>
+		if(this.props.hasPartner) return null;
+		
+		let status = (
+			<div>
+				<Typography.Body2>Välkommen till Grymer.se</Typography.Body2>
+				<Typography.Body1>En social plattform för anonyma och sociala.</Typography.Body1>
+				<Typography.Body1>Du har ingen partner.<br />Tryck på START för att börja.</Typography.Body1>
 			</div>
 		);
+		
+		if(this.props.isSearching) {
+			status = <Typography.Body1>Söker efter en partner...</Typography.Body1>;
+		}
+		
+		return (
+			<div style={[styles.videoOverlay, styles.videoOverlayText, { textAlign: 'center' }]}>
+				{status}
+			</div>
+		);
+	}
+	
+	handleChangRequestChatDrawer(open) {
+		this.setState({ navDrawerOpen: open });
 	}
 
 	render() {
@@ -222,6 +161,7 @@ class ChatRoulette extends React.Component {
 			<div>
 				<WebRTCSupport>
 					{this.renderMinimal()}
+					<ChatDrawer open={this.state.navDrawerOpen} onRequestChangeNavDrawer={this.handleChangRequestChatDrawer} />
 				</WebRTCSupport>
 				<WebRTCNoSupport>
 					<NotSupported />
@@ -230,8 +170,14 @@ class ChatRoulette extends React.Component {
 		);
 	}
 	
+	handleOnChatToggle() {
+		this.setState({
+			navDrawerOpen: !this.state.navDrawerOpen
+		});
+	}
+	
 	renderMinimal() {
-		const { hasRemote, windowHeight, isSearching, muteLocalAudio, muteLocalVideo } = this.state;
+		const { windowHeight } = this.state;
 		styleMinimal.base.height = windowHeight;
 		return (
 			<div style={styleMinimal.base}>
@@ -239,21 +185,38 @@ class ChatRoulette extends React.Component {
 					{this.renderRemoteOverlay()}
 					<video style={[styles.video]} ref={el => this.otherVideoEl = el } autoPlay />
 					
+					<div style={{ position: 'absolute', top: 0, right: 0 }}>
+						<Badge
+							primary={true}
+							badgeContent=""
+							badgeStyle={{width: 8, height: 8, top: 30, right: 30}}
+							>
+							<IconButton onClick={this.handleOnChatToggle}>
+								<ChatIcon color="#FFF" />
+							</IconButton>
+						</Badge>
+					</div>
+					
 					<Toolbar videoWidth={this.state.clientVideoWidth} 
-							 videoHeight={this.state.clientVideoHeight}
-							 handleStartStop={this.toggleStart}
-							 handleNext={this.handleNext}
-							 getVideo={this.getLocalVideoEl}
-							 hasStarted={isSearching}
-							 hasRemote={hasRemote}
-							 handleMuteMyAudio={this.handleMuteMyAudio}
-							 handleMuteMyVideo={this.handleMuteMyVideo}
-							 muteLocalAudio={muteLocalAudio}
-							 muteLocalVideo={muteLocalVideo} />
+							 videoHeight={this.state.clientVideoHeight} />
 				</div>
 			</div>
 		);
 	}
 }
 
-export default Radium(ChatRoulette);
+function mapStateToProps(state) {
+	return {
+		isSearching: state.isSearching,
+		hasPartner: state.hasPartner
+	};
+}
+
+function mapDispatchToProps(dispatch) {
+	return {
+		sendICECandidate: candidate => dispatch(sendICECandidate(candidate)),
+		setupRemoteVideoElement: (videoEl) => dispatch(setupRemoteVideoElement(videoEl))
+	}
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(Radium(Grymer));
