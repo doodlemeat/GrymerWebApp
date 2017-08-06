@@ -20,7 +20,7 @@ class Toolbar extends Component {
 								style={{ flexGrow: '1', borderRadius: 0 }}
 								onClick={this.props.toggleSearch}
 								disabled={this.props.hasSignalingConnection ? false : true}
-								label={this.props.isSearching ? 'Stopp' : 'Start'}
+								label={this.props.isSearching ? 'Stoppa' : 'Starta'}
 								icon={<FontIcon className="material-icons">{this.props.isSearching ? 'stop' : 'play_arrow'}</FontIcon>} />
 					<RaisedButton  
 								style={{ flexGrow: '1', borderRadius: 0 }}

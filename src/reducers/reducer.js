@@ -8,13 +8,21 @@ import {
 	SEARCH_NEXT,
 	SIGNALING_DISCONNECT,
 	SIGNALING_CONNECT,
-	RECEIVE_CHAT_MESSAGE
+	RECEIVE_CHAT_MESSAGE,
+	TOGGLE_CHAT
 } from '../actions';
 
 export default function reducer(state = {}, action) {
   switch(action.type) {
 
 	case RECEIVE_CHAT_MESSAGE:
+		return {
+			...state,
+			messages: [...state.messages, action.message],
+			hasUnreadMessages: state.isChatDrawerOpen ? false : true,
+			lastReceiveMessage: Date.now()
+		};
+		
     case CHAT_MESSAGE:
 		return {
 			...state,
@@ -68,6 +76,13 @@ export default function reducer(state = {}, action) {
 		return {
 			...state,
 			hasSignalingConnection: true
+		};
+		
+	case TOGGLE_CHAT:
+		return {
+			...state,
+			isChatDrawerOpen: typeof action.force === 'undefined' ? !state.isChatDrawerOpen : action.force,
+			hasUnreadMessages: state.hasUnreadMessages ? !(typeof action.force === 'undefined' ? !state.isChatDrawerOpen : action.force) : state.hasUnreadMessages
 		};
 		
     default:

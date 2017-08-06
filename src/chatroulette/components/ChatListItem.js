@@ -33,7 +33,9 @@ const styles = {
 	},
 
 	chatTextStyle: {
-		margin: 0
+		margin: 0,
+		whiteSpace: 'pre-wrap',
+		wordBreak: 'break-all'
 	}
 }
 

@@ -129,8 +129,6 @@ class Session extends EventEmitter {
 		this._remoteStream = event.stream;
 		this._remoteVideo.srcObject = event.stream;
 		
-		console.log(event.stream);
-		
 		this.emit('remote-stream', this._remoteStream);
 	}
 	

@@ -11,9 +11,9 @@ import Badge from 'material-ui/Badge';
 import IconButton from 'material-ui/IconButton';
 import ChatIcon from 'material-ui/svg-icons/communication/chat';
 import { connect } from 'react-redux';
-import { sendICECandidate, setupRemoteVideoElement } from '../actions';
-
-//import { Session, RemoteStatus } from './session';
+import { sendICECandidate, setupRemoteVideoElement, toggleChat } from '../actions';
+import Sound from 'react-sound';
+import notification from '../notification.ogg';
 
 const styles = {
 	base: {
@@ -75,21 +75,21 @@ const styleMinimal = {
 
 class Grymer extends React.Component {
 
-	constructor() {
-		super();
+	constructor(props) {
+		super(props);
 		
 		this.state = {
 			clientVideoWidth: 90,
 			clientVideoHeight: 90,
 			orientationAngle: false,
 			windowHeight: $(window).height(),
-			navDrawerOpen: false
+			playNotification: Sound.status.STOPPED,
+			lastReceiveMessage: props.lastReceiveMessage
 		};
+		
 		this.onResize = this.onResize.bind(this);
 		this.onOrientationChange = this.onOrientationChange.bind(this);
 		this.onLocalVideoDimensions = this.onLocalVideoDimensions.bind(this);
-		this.handleChangRequestChatDrawer = this.handleChangRequestChatDrawer.bind(this);
-		this.handleOnChatToggle = this.handleOnChatToggle.bind(this);
 	}
 	
 	onOrientationChange() {
@@ -135,9 +135,9 @@ class Grymer extends React.Component {
 		
 		let status = (
 			<div>
-				<Typography.Body2>Välkommen till Grymer.se</Typography.Body2>
-				<Typography.Body1>En social plattform för anonyma och sociala.</Typography.Body1>
-				<Typography.Body1>Du har ingen partner.<br />Tryck på START för att börja.</Typography.Body1>
+				{/*<Typography.Body2>Välkommen till Grymer.se</Typography.Body2>
+				<Typography.Body1>Perfekt för dig som är eller vill bli social.</Typography.Body1>*/}
+				<Typography.Body1>Du har ingen partner.<br />Tryck på STARTA för att börja.</Typography.Body1>
 			</div>
 		);
 		
@@ -152,8 +152,13 @@ class Grymer extends React.Component {
 		);
 	}
 	
-	handleChangRequestChatDrawer(open) {
-		this.setState({ navDrawerOpen: open });
+	componentWillReceiveProps(newProps) {
+		if(this.state.lastReceiveMessage !== newProps.lastReceiveMessage) {
+			this.setState({
+				lastReceiveMessage: newProps.lastReceiveMessage,
+				playNotification: Sound.status.PLAYING
+			});
+		}
 	}
 
 	render() {
@@ -161,7 +166,13 @@ class Grymer extends React.Component {
 			<div>
 				<WebRTCSupport>
 					{this.renderMinimal()}
-					<ChatDrawer open={this.state.navDrawerOpen} onRequestChangeNavDrawer={this.handleChangRequestChatDrawer} />
+					<ChatDrawer open={this.props.isChatDrawerOpen} onRequestChangeNavDrawer={this.props.toggleChat} />
+					<Sound
+					  url={notification}
+					  autoLoad={true}
+					  onPlaying={() => this.setState({ playNotification: Sound.status.STOPPED })}
+					  playStatus={this.state.playNotification}
+					/>
 				</WebRTCSupport>
 				<WebRTCNoSupport>
 					<NotSupported />
@@ -170,10 +181,19 @@ class Grymer extends React.Component {
 		);
 	}
 	
-	handleOnChatToggle() {
-		this.setState({
-			navDrawerOpen: !this.state.navDrawerOpen
-		});
+	renderUnreadMessagesBadge() {
+		if(!this.props.hasUnreadMessages)
+			return this.renderToggleChatButton();
+		
+		return <Badge primary={true} badgeContent="" style={{ padding: 0 }} badgeStyle={{width: 8, height: 8, top: 8, right: 8}}>{this.renderToggleChatButton()}</Badge>;
+	}
+	
+	renderToggleChatButton() {
+		return (
+			<IconButton onClick={this.props.toggleChat}>
+				<ChatIcon color="#FFF" />
+			</IconButton>
+		);
 	}
 	
 	renderMinimal() {
@@ -185,17 +205,7 @@ class Grymer extends React.Component {
 					{this.renderRemoteOverlay()}
 					<video style={[styles.video]} ref={el => this.otherVideoEl = el } autoPlay />
 					
-					<div style={{ position: 'absolute', top: 0, right: 0 }}>
-						<Badge
-							primary={true}
-							badgeContent=""
-							badgeStyle={{width: 8, height: 8, top: 30, right: 30}}
-							>
-							<IconButton onClick={this.handleOnChatToggle}>
-								<ChatIcon color="#FFF" />
-							</IconButton>
-						</Badge>
-					</div>
+					<div style={{ position: 'absolute', top: 0, right: 0 }}>{this.renderUnreadMessagesBadge()}</div>
 					
 					<Toolbar videoWidth={this.state.clientVideoWidth} 
 							 videoHeight={this.state.clientVideoHeight} />
@@ -207,15 +217,19 @@ class Grymer extends React.Component {
 
 function mapStateToProps(state) {
 	return {
+		hasUnreadMessages: state.hasUnreadMessages,
 		isSearching: state.isSearching,
-		hasPartner: state.hasPartner
+		hasPartner: state.hasPartner,
+		isChatDrawerOpen: state.isChatDrawerOpen,
+		lastReceiveMessage: state.lastReceiveMessage
 	};
 }
 
 function mapDispatchToProps(dispatch) {
 	return {
 		sendICECandidate: candidate => dispatch(sendICECandidate(candidate)),
-		setupRemoteVideoElement: (videoEl) => dispatch(setupRemoteVideoElement(videoEl))
+		setupRemoteVideoElement: (videoEl) => dispatch(setupRemoteVideoElement(videoEl)),
+		toggleChat: (force) => dispatch(toggleChat(force))
 	}
 }
 

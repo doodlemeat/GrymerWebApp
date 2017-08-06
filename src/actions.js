@@ -17,6 +17,7 @@ export const SIGNALING_DISCONNECT = 'SIGNALING_DISCONNECT';
 export const SIGNALING_CONNECT = 'SIGNALING_CONNECT';
 export const RECEIVE_LOCAL_VIDEO_SIZE = 'RECEIVE_LOCAL_VIDEO_SIZE';
 export const RECEIVE_CHAT_MESSAGE = 'RECEIVE_CHAT_MESSAGE';
+export const TOGGLE_CHAT = 'TOGGLE_CHAT';
 
 export const writeMessage = message => {
 	return { 
@@ -37,3 +38,14 @@ export const startLocalVideo = videoEl => ({ type: START_LOCAL_VIDEO, videoEl })
 export const toggleSearch = () => ({ type: TOGGLE_SEARCH });
 export const setupRemoteVideoElement = videoEl => ({ type: SETUP_REMOTE_VIDEO_ELEMENT, videoEl });
 export const receiveRemoteStream = () => ({ type: RECEIVE_REMOTE_STREAM });
+
+export const toggleChat = (force) => {
+	if(typeof force !== 'boolean') {
+		force = undefined;
+	}
+	
+	return {
+		type: TOGGLE_CHAT,
+		force
+	};
+};

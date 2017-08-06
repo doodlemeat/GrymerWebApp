@@ -1,7 +1,5 @@
 import React from 'react';
 import Drawer from 'material-ui/Drawer';
-import Paper from 'material-ui/Paper';
-import Typography from '@react-mdc/typography';
 import { lightBlue800, grey300 } from 'material-ui/styles/colors';
 import TextField from 'material-ui/TextField';
 import SendIcon from 'material-ui/svg-icons/content/send';
@@ -36,8 +34,7 @@ const styles = {
 	chatItems: {
 		flexGrow: 1,
 		padding: 6,
-		overflow: 'auto',
-		background: 'blue'
+		overflow: 'auto'
 	}
 }
 
@@ -49,15 +46,15 @@ class ChatDrawer extends React.Component {
 	}
 	
 	handleOnSend() {
-		//if(!this.props.hasPartner) return;
+		if(!this.props.hasPartner) return;
 		
-		this.props.onWriteMessage(this.textField.input.refs.input.value);
+		let value = this.textField.input.refs.input.value.trim();
+		
+		if(value === '') return;
+		
+		this.props.onWriteMessage(value);
 		
 		this.textField.input.refs.input.value = '';
-	}
-	
-	renderChatItem(message, key) {
-		return <ChatListItem key={key} from={message.from} message={message.message}></ChatListItem>;
 	}
 	
 	componentDidUpdate() {
@@ -69,7 +66,9 @@ class ChatDrawer extends React.Component {
 			open
 		} = this.props;
 		
-		const chatItems = this.props.messages.map((message, index) => this.renderChatItem(message, index));
+		const chatItems = this.props.messages.map((message, index) => {
+			return <ChatListItem key={index} from={message.from} message={message.message} />;
+		});
 		
 		return (
 			<Drawer openSecondary={true} open={open} docked={false} onRequestChange={this.props.onRequestChangeNavDrawer}>

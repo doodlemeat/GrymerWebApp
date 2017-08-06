@@ -9,7 +9,9 @@ import ChatRouletteMiddleware from './chatroulette-middleware';
 import { sendICECandidate, receiveRemoteStream, receiveLocalVideoSize, SIGNALING_DISCONNECT, SIGNALING_CONNECT } from './actions';
 import Grymer from './chatroulette/session';
 
-const socket = io('https://dev.signaling.grymer.se');
+const env = process.env.NODE_ENV === 'development' ? 'dev.' : '';
+
+const socket = io(`https://${env}signaling.grymer.se`);
 
 const socketIoMiddleware = createSocketIoMiddleware(socket, 'server/');
 
@@ -20,6 +22,9 @@ const initialState = {
 	isSearching: false,
 	hasPartner: false,
 	hasSignalingConnection: false,
+	isChatDrawerOpen: false,
+	hasUnreadMessages: false,
+	lastReceiveMessage: null,
 	muteLocalAudio: Store.get('muteLocalAudio') || false,
 	muteLocalVideo: Store.get('muteLocalVideo') || false
 };
