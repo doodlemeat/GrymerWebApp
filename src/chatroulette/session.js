@@ -64,9 +64,28 @@ class Session extends EventEmitter {
 			return console.error('Has no local video element set');
 		}
 		
-		const mediaConstraints = { video: true, audio: true };
-		return navigator.mediaDevices.getUserMedia(mediaConstraints).then(stream => {
+		const constraints = {};
+		
+		if(options.audioDevice) {
+			constraints.audio = {
+				deviceId: options.audioDevice
+			};
+		} else {
+			constraints.audio = true;
+		}
+		
+		if(options.videoDevice) {
+			constraints.video = {
+				deviceId: options.videoDevice
+			};
+		} else {
+			constraints.video = true;
+		}
+		return navigator.mediaDevices.getUserMedia(constraints).then((stream) => {
 			this._localStream = stream;
+			if(this._localVideo.srcObject) {
+				this._localVideo.srcObject.getTracks().forEach(track => track.stop());
+			}
 			this._localVideo.srcObject = this._localStream;
 			this._localVideo.onloadedmetadata = e => {
 				if(options.muteLocalAudio) {
@@ -78,7 +97,7 @@ class Session extends EventEmitter {
 				}
 				this.emit('local-video-dimensions', e.target.videoWidth, e.target.videoHeight);
 			};
-		});
+		}).catch(error => {alert(error.name);console.error(error.name, ':', error.message) }); 
 	}
 	
 	refreshLocalVideo() {

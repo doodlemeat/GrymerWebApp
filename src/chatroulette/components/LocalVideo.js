@@ -7,8 +7,10 @@ import { toggleMuteLocalAudio, toggleMuteLocalVideo, startLocalVideo } from '../
 
 class LocalVideo extends React.Component {
 	
-	componentDidMount() {
-		this.props.startLocalVideo(this.localVideoEl);
+	componentWillReceiveProps(newProps) {
+		if(newProps.hasReceivedMediaDevices) {
+			this.props.startLocalVideo(this.localVideoEl);
+		}
 	}
 	
 	render() {
@@ -50,7 +52,8 @@ class LocalVideo extends React.Component {
 function mapStateToProps(state) {
 	return {
 		muteLocalAudio: state.muteLocalAudio,
-		muteLocalVideo: state.muteLocalVideo
+		muteLocalVideo: state.muteLocalVideo,
+		hasReceivedMediaDevices: state.hasReceivedMediaDevices
 	};
 }
 

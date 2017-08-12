@@ -10,10 +10,12 @@ import ChatDrawer from './components/ChatDrawer';
 import Badge from 'material-ui/Badge';
 import IconButton from 'material-ui/IconButton';
 import ChatIcon from 'material-ui/svg-icons/communication/chat';
+import ControlPanelIcon from 'material-ui/svg-icons/navigation/more-vert';
 import { connect } from 'react-redux';
-import { sendICECandidate, setupRemoteVideoElement, toggleChat } from '../actions';
+import { sendICECandidate, setupRemoteVideoElement, toggleChat, toggleControlPanel } from '../actions';
 import Sound from 'react-sound';
 import notification from '../notification.ogg';
+import ControlPanel from './components/ControlPanel';
 
 const styles = {
 	base: {
@@ -167,6 +169,7 @@ class Grymer extends React.Component {
 				<WebRTCSupport>
 					{this.renderMinimal()}
 					<ChatDrawer open={this.props.isChatDrawerOpen} onRequestChangeNavDrawer={this.props.toggleChat} />
+					<ControlPanel open={this.props.isControlPanelOpen} onRequestChangeNavDrawer={this.props.toggleControlPanel} />
 					<Sound
 					  url={notification}
 					  autoLoad={true}
@@ -196,6 +199,14 @@ class Grymer extends React.Component {
 		);
 	}
 	
+	renderToggleControlPanelButton() {
+		return (
+			<IconButton onClick={this.props.toggleControlPanel}>
+				<ControlPanelIcon color="#FFF" /> 
+			</IconButton>
+		);
+	}
+	
 	renderMinimal() {
 		const { windowHeight } = this.state;
 		styleMinimal.base.height = windowHeight;
@@ -205,6 +216,7 @@ class Grymer extends React.Component {
 					{this.renderRemoteOverlay()}
 					<video style={[styles.video]} ref={el => this.otherVideoEl = el } autoPlay />
 					
+					<div style={{ position: 'absolute', top: 0, left: 0 }}>{this.renderToggleControlPanelButton()}</div>
 					<div style={{ position: 'absolute', top: 0, right: 0 }}>{this.renderUnreadMessagesBadge()}</div>
 					
 					<Toolbar videoWidth={this.state.clientVideoWidth} 
@@ -221,6 +233,7 @@ function mapStateToProps(state) {
 		isSearching: state.isSearching,
 		hasPartner: state.hasPartner,
 		isChatDrawerOpen: state.isChatDrawerOpen,
+		isControlPanelOpen: state.isControlPanelOpen,
 		lastReceiveMessage: state.lastReceiveMessage
 	};
 }
@@ -229,7 +242,8 @@ function mapDispatchToProps(dispatch) {
 	return {
 		sendICECandidate: candidate => dispatch(sendICECandidate(candidate)),
 		setupRemoteVideoElement: (videoEl) => dispatch(setupRemoteVideoElement(videoEl)),
-		toggleChat: (force) => dispatch(toggleChat(force))
+		toggleChat: (force) => dispatch(toggleChat(force)),
+		toggleControlPanel: (force) => dispatch(toggleControlPanel(force))
 	}
 }
 

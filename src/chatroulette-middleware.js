@@ -11,7 +11,9 @@ import {
 	REMOTE_HANGUP,
 	TOGGLE_SEARCH,
 	SEARCH_NEXT,
-	SIGNALING_DISCONNECT
+	SIGNALING_DISCONNECT,
+	SELECT_VIDEO_DEVICE,
+	SELECT_AUDIO_DEVICE
 } from './actions';
 import Grymer from './chatroulette/session';
 import Store from 'store';
@@ -55,8 +57,30 @@ export default socket => store => next => action => {
 			Grymer.setLocalVideoElement(action.videoEl);
 			Grymer.startLocalVideo({
 				muteLocalAudio: state.muteLocalAudio,
-				muteLocalVideo: state.muteLocalVideo
+				muteLocalVideo: state.muteLocalVideo,
+				audioDevice: state.selectedAudioDevice,
+				videoDevice: state.selectedVideoDevice
 			});
+			break;
+		case SELECT_VIDEO_DEVICE:
+			Store.set('selectedVideoDevice', action.deviceId);
+			Grymer.startLocalVideo({
+				muteLocalAudio: state.muteLocalAudio,
+				muteLocalVideo: state.muteLocalVideo,
+				audioDevice: state.selectedAudioDevice,
+				videoDevice: action.deviceId,
+			});
+			next(action);
+			break;
+		case SELECT_AUDIO_DEVICE:
+			Store.set('selectedAudioDevice', action.deviceId);
+			Grymer.startLocalVideo({
+				muteLocalAudio: state.muteLocalAudio,
+				muteLocalVideo: state.muteLocalVideo,
+				audioDevice: action.deviceId,
+				videoDevice: state.selectedVideoDevice,
+			});
+			next(action);
 			break;
 		case SETUP_REMOTE_VIDEO_ELEMENT:
 			Grymer.setRemoteVideoElement(action.videoEl);

@@ -18,6 +18,10 @@ export const SIGNALING_CONNECT = 'SIGNALING_CONNECT';
 export const RECEIVE_LOCAL_VIDEO_SIZE = 'RECEIVE_LOCAL_VIDEO_SIZE';
 export const RECEIVE_CHAT_MESSAGE = 'RECEIVE_CHAT_MESSAGE';
 export const TOGGLE_CHAT = 'TOGGLE_CHAT';
+export const TOGGLE_CONTROL_PANEL = 'TOGGLE_CONTROL_PANEL';
+export const SET_MEDIA_DEVICES = 'SET_MEDIA_DEVICES';
+export const SELECT_AUDIO_DEVICE = 'SELECT_AUDIO_DEVICE';
+export const SELECT_VIDEO_DEVICE = 'SELECT_VIDEO_DEVICE';
 
 export const writeMessage = message => {
 	return { 
@@ -49,3 +53,18 @@ export const toggleChat = (force) => {
 		force
 	};
 };
+
+export const toggleControlPanel = (force) => {
+	if(typeof force !== 'boolean') {
+		force = undefined;
+	}
+	
+	return {
+		type: TOGGLE_CONTROL_PANEL,
+		force
+	};
+};
+
+export const setMediaDevices = (devices) => ({ type: SET_MEDIA_DEVICES, devices });
+export const selectAudioDevice = (deviceId) => ({ type: SELECT_AUDIO_DEVICE, deviceId });
+export const selectVideoDevice = (deviceId) => ({ type: SELECT_VIDEO_DEVICE, deviceId });

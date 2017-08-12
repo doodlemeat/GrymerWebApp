@@ -9,11 +9,56 @@ import {
 	SIGNALING_DISCONNECT,
 	SIGNALING_CONNECT,
 	RECEIVE_CHAT_MESSAGE,
-	TOGGLE_CHAT
+	TOGGLE_CHAT,
+	TOGGLE_CONTROL_PANEL,
+	SET_MEDIA_DEVICES,
+	SELECT_AUDIO_DEVICE,
+	SELECT_VIDEO_DEVICE
 } from '../actions';
+
+			
+// only change selected devices if they are null ...
+// ... since they can be stored in LS and we don't want to override a users choice
+function setSelectedDevice(currentDevice, receivedDevices) {
+	if(currentDevice) {
+		return currentDevice;
+	}
+	
+	if(receivedDevices.length === 0) {
+		return null;
+	}
+	
+	return receivedDevices[0].deviceId;
+}
 
 export default function reducer(state = {}, action) {
   switch(action.type) {
+	  
+	case SET_MEDIA_DEVICES:
+		const audioDevices = action.devices.filter(device => device.kind === 'audioinput');
+		const videoDevices = action.devices.filter(device => device.kind === 'videoinput');
+			
+		return {
+			...state,
+			hasReceivedMediaDevices: true,
+			audioDevices,
+			videoDevices,
+			selectedAudioDevice: setSelectedDevice(state.selectedAudioDevice, audioDevices),
+			selectedVideoDevice: setSelectedDevice(state.selectedVideoDevice, videoDevices)
+		};
+		
+	case SELECT_AUDIO_DEVICE:
+		return {
+			...state,
+			selectedAudioDevice: action.deviceId
+		};
+		break;
+		
+	case SELECT_VIDEO_DEVICE:
+		return {
+			...state,
+			selectedVideoDevice: action.deviceId
+		};
 
 	case RECEIVE_CHAT_MESSAGE:
 		return {
@@ -83,6 +128,12 @@ export default function reducer(state = {}, action) {
 			...state,
 			isChatDrawerOpen: typeof action.force === 'undefined' ? !state.isChatDrawerOpen : action.force,
 			hasUnreadMessages: state.hasUnreadMessages ? !(typeof action.force === 'undefined' ? !state.isChatDrawerOpen : action.force) : state.hasUnreadMessages
+		};
+		
+	case TOGGLE_CONTROL_PANEL:
+		return {
+			...state,
+			isControlPanelOpen: typeof action.force === 'undefined' ? !state.isControlPanelOpen : action.force
 		};
 		
     default:

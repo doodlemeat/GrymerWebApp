@@ -6,7 +6,7 @@ import reducer from './reducers/reducer';
 import io from 'socket.io-client';
 import Store from 'store';
 import ChatRouletteMiddleware from './chatroulette-middleware';
-import { sendICECandidate, receiveRemoteStream, receiveLocalVideoSize, SIGNALING_DISCONNECT, SIGNALING_CONNECT } from './actions';
+import { sendICECandidate, receiveRemoteStream, receiveLocalVideoSize, SIGNALING_DISCONNECT, SIGNALING_CONNECT, setMediaDevices } from './actions';
 import Grymer from './chatroulette/session';
 
 const env = process.env.NODE_ENV === 'development' ? 'dev.' : '';
@@ -23,8 +23,14 @@ const initialState = {
 	hasPartner: false,
 	hasSignalingConnection: false,
 	isChatDrawerOpen: false,
+	isControlPanelOpen: false,
 	hasUnreadMessages: false,
+	hasReceivedMediaDevices: false,
 	lastReceiveMessage: null,
+	selectedAudioDevice: Store.get('selectedAudioDevice') || null,
+	selectedVideoDevice: Store.get('selectedVideoDevice') || null,
+	audioDevices: [],
+	videoDevices: [],
 	muteLocalAudio: Store.get('muteLocalAudio') || false,
 	muteLocalVideo: Store.get('muteLocalVideo') || false
 };
@@ -51,6 +57,10 @@ Grymer.on('ice-candidate', candidate => {
 
 Grymer.on('remote-stream', () => {
 	store.dispatch(receiveRemoteStream());
+});
+
+navigator.mediaDevices.enumerateDevices().then(devices => {
+	store.dispatch(setMediaDevices(devices));
 });
 
 export default store;
